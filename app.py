@@ -92,5 +92,18 @@ def get_summoner_data(summoner_name, summoner_tag, info, region):
         return jsonify({"error": "Geçersiz bilgi türü. Kullanılabilir türler: rank, elo, score"}), 400
 
 
+from flask import Flask
+import os
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Hello, Flask is running!"
+
+# Diğer rotalarınızı buraya ekleyebilirsiniz...
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    # PORT ortam değişkenini kontrol eder, yoksa 5000 portunu kullanır.
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
