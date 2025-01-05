@@ -1,4 +1,4 @@
-import requests
+import os
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -82,5 +82,7 @@ def get_summoner_info():
         return jsonify({"error": str(e)}), 500
 
 
+# Flask'ı dış dünyaya açmak için 0.0.0.0 ve Render'ın verdiği port üzerinden çalıştır
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Render, PORT değişkenini otomatik olarak sağlar
+    app.run(host="0.0.0.0", port=port, debug=True)
