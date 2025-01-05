@@ -5,7 +5,7 @@ import urllib.parse  # URL encoding için
 app = Flask(__name__)
 
 # Riot API Key
-API_KEY = "RGAPI-xxxxxxxx-xxxx-xxxx-xxxxxxxxxxxx"
+API_KEY = "RGAPI-759a30f4-318d-44fe-91b7-e3fabd5bc9e9"
 
 @app.route('/summoner', methods=['GET'])
 def get_summoner_data():
