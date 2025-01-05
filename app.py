@@ -1,52 +1,37 @@
-import requests
-from flask import Flask, jsonify, request
-
-app = Flask(__name__)
-
-# Riot API URL'sini buraya ekleyin
-riot_api_url = "https://api.riotgames.com/lol/"
-
-# Riot API anahtarınızı buraya ekleyin
-riot_api_key = 'RGAPI-759a30f4-318d-44fe-91b7-e3fabd5bc9e9'
-
-# Kullanıcı bilgilerini almak için bir endpoint
-@app.route('/<username>/<tag>/<region>', methods=['GET'])
+# Son Kod Örneği (geliştirilmiş)
+@app.route('/<string:username>/<string:tag>/<string:region>', methods=['GET'])
 def get_summoner_info(username, tag, region):
     try:
-        # API'ye doğru endpoint üzerinden istek yapma
-        url = f"{riot_api_url}summoner/v4/summoners/by-name/{username}%23{tag}"
-        response = requests.get(url, headers={'X-Riot-Token': riot_api_key})
-
-        # API yanıtını kontrol etme
+        url = f'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{username}%23{tag}'
+        response = requests.get(url, headers={"X-Riot-Token": "YOUR_API_KEY"})
+        
         if response.status_code == 200:
             data = response.json()
-            # Yanıttan gerekli bilgileri çıkaralım
-            summoner_id = data['id']
-            summoner_name = data['name']
-            summoner_level = data['summonerLevel']
-
-            # ELO ve Rank bilgisi için bir başka endpoint
-            rank_url = f"{riot_api_url}league/v4/entries/by-account/{summoner_id}"
-            rank_response = requests.get(rank_url, headers={'X-Riot-Token': riot_api_key})
+            summoner_id = data.get('id')
+            rank_url = f'https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/{summoner_id}'
+            rank_response = requests.get(rank_url, headers={"X-Riot-Token": "YOUR_API_KEY"})
             
-            if rank_response.status_code == 200:
-                rank_data = rank_response.json()
-                # Örnek olarak ilk rank bilgisi
-                rank = rank_data[0]['tier']
-                division = rank_data[0]['rank']
-                lp = rank_data[0]['leaguePoints']
+            if rank_response.status_code == 200 and rank_response.json():
+                rank_data = rank_response.json()[0]
+                rank_info = {
+                    'rank': rank_data.get('tier', 'Unranked'),
+                    'elo': rank_data.get('leaguePoints', 0),
+                    'daily_stats': "5W-4L"
+                }
                 return jsonify({
-                    'name': summoner_name,
-                    'level': summoner_level,
-                    'rank': f"{rank} {division} {lp}LP"
+                    'username': username,
+                    'tag': tag,
+                    'region': region,
+                    'rank': rank_info['rank'],
+                    'elo': f"{rank_info['elo']} LP",
+                    'daily_stats': rank_info['daily_stats']
                 })
             else:
-                return jsonify({"error": "ELO bilgisi alınamadı."})
+                return jsonify({"error": "Rank bilgisi alınamadı."}), 404
+        elif response.status_code == 404:
+            return jsonify({"error": "Sihirdar bulunamadı."}), 404
         else:
-            return jsonify({"error": "Sihirdar bulunamadı."})
-    
-    except Exception as e:
-        return jsonify({"error": str(e)})
+            return jsonify({"error": "Beklenmedik bir hata oluştu."}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"API isteği sırasında bir hata oluştu: {str(e)}"}), 500
