@@ -1,11 +1,12 @@
+import os  # Ortam değişkenlerini almak için
 from flask import Flask, request, jsonify
 import requests
-import urllib.parse  # URL encoding için
+import urllib.parse
 
 app = Flask(__name__)
 
-# Riot API Key
-API_KEY = "RGAPI-759a30f4-318d-44fe-91b7-e3fabd5bc9e9"
+# Riot API Key (kendi anahtarını buraya koymalısın)
+API_KEY = "RGAPI-xxxxxxxx-xxxx-xxxx-xxxxxxxxxxxxxx"
 
 @app.route('/summoner', methods=['GET'])
 def get_summoner_data():
@@ -86,6 +87,7 @@ def get_summoner_data():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
+# Render platformu için port ayarlarını yapıyoruz
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Render otomatik olarak PORT değişkenini verir
+    app.run(host='0.0.0.0', port=port)  # Flask'ı doğru porta ve host'a bağlıyoruz
